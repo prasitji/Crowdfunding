@@ -118,14 +118,195 @@ truffle migrate
 ทำการแก้ไขตัวแปรต่างๆ สำหรับ Back-end
 
 ```
-code
+App = {
+  web3Provider: null,
+  contracts: {},
+
+  init: async function() {
+    // Load companys.
+    $.getJSON('../companys.json', function(data) {
+      var companysRow = $('#companysRow');
+      var companyTemplate = $('#companyTemplate');
+
+      for (i = 0; i < data.length; i ++) {
+        companyTemplate.find('.panel-title').text(data[i].name);
+        companyTemplate.find('img').attr('src', data[i].picture);
+        companyTemplate.find('.company-interest').text(data[i].interest);
+        companyTemplate.find('.company-fund').text(data[i].fund);
+        companyTemplate.find('.company-ratio').text(data[i].ratio);
+        companyTemplate.find('.btn-Adopt').attr('data-id', data[i].id);
+
+        companysRow.append(companyTemplate.html());
+      }
+    });
+
+    return await App.initWeb3();
+  },
+
+  initWeb3: async function() {
+    // Modern dapp browsers...
+    if (window.ethereum) {
+      App.web3Provider = window.ethereum;
+      try {
+        // Request account access
+        await window.ethereum.enable();
+      } catch (error) {
+        // User denied account access...
+        console.error("User denied account access")
+      }
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+      App.web3Provider = window.web3.currentProvider;
+    }
+    // If no injected web3 instance is detected, fall back to Ganache
+    else {
+      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+    }
+    web3 = new Web3(App.web3Provider);
+
+    return App.initContract();
+  },
+
+  initContract: function() {
+    $.getJSON('crowdfunding.json', function (data) {
+      // Get the necessary contract artifact file and instantiate it with @truffle/contract
+      var crowdfundingArtifact = data;
+      App.contracts.crowdfunding = TruffleContract(crowdfundingArtifact);
+
+      // Set the provider for our contract
+      App.contracts.crowdfunding.setProvider(App.web3Provider);
+
+      // Use our contract to retrieve and mark the Adopted pets
+      return App.markAdopted();
+    });
+    return App.bindEvents();
+  },
+
+  bindEvents: function() {
+    $(document).on('click', '.btn-Adopt', App.handleAdopt);
+  },
+
+  markAdopted: function() {
+    var crowdfundingInstance;
+
+    App.contracts.crowdfunding.deployed().then(function (instance) {
+      crowdfundingInstance = instance;
+
+      return crowdfundingInstance.getBookers.call();
+    }).then(function (Bookers) {
+      for (i = 0; i < Bookers.length; i++) {
+        if (Bookers[i] !== '0x0000000000000000000000000000000000000000') {
+          $('.panel-company').eq(i).find('button').text('Booked').attr('disabled', true);
+        }
+      }
+    }).catch(function (err) {
+      console.log(err.message);
+    });
+  },
+
+  handleAdopt: function(event) {
+    event.preventDefault();
+
+    var companyID = parseInt($(event.target).data('id'));
+
+    var crowdfundingInstance;
+
+    web3.eth.getAccounts(function (error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      App.contracts.crowdfunding.deployed().then(function (instance) {
+        crowdfundingInstance = instance;
+
+        // Execute Adopt as a transaction by sending account
+        return crowdfundingInstance.Adopt(companyID, { from: account });
+      }).then(function (result) {
+        return App.markAdopted();
+      }).catch(function (err) {
+        console.log(err.message);
+      });
+    });
+  }
+
+};
+
+$(function() {
+  $(window).load(function() {
+    App.init();
+  });
+});
 ```
 
 ### 3. แก้ไข Front-end 
 ทำการแก้ไขในส่วนของ UI ให้มีการแสดงผลตามต้องการ
 
 ```
-code
+ines (56 sloc) 2.51 KB
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Crowdfunding</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8 col-sm-push-2">
+          <h1 class="text-center">Crowdfunding</h1>
+          <hr/>
+          <br/>
+        </div>
+      </div>
+
+      <div id="companysRow" class="row">
+        <!-- companyS LOAD HERE -->
+      </div>
+    </div>
+
+    <div id="companyTemplate" style="display: none;">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="panel panel-default panel-company">
+          <div class="panel-heading">
+            <h3 class="panel-title">Scrappy</h3>
+          </div>
+          <div class="panel-body">
+            <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;" src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
+            <br/><br/>
+            <strong>Interest Rate</strong>: <span class="company-interest">Golden Retriever</span><br/>
+            <strong>Fund Amount</strong>: <span class="company-fund">3</span><br/>
+            <strong>DE Ratio</strong>: <span class="company-ratio">Warren, MI</span><br/><br/>
+            <button class="btn btn-default btn-Adopt" type="button" data-id="0">Booking</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/web3.min.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
 ```
 
 ### 4.ทำการสั่ง Run
