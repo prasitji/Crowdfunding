@@ -18,7 +18,21 @@ truffle unbox pet-shop
 ### 1. Create Smart Contract
 ใช้ Visual Studio Code เพื่อสร้างไฟล์ชื่อ Name.sol ในไดเร็กทอรี contracts โดยมีโค้ดดังนี้
 ```
-code
+pragma solidity ^0.5.0;
+
+contract crowdfunding {
+    address[6] public investers;
+
+    function Adopt(uint companyId) public returns (uint) {
+        require(companyId >= 0 && companyId <=5);
+        investers[companyId] = msg.sender;
+        return companyId;
+    }
+
+    function getinvesters() public view returns (address[6] memory) {
+        return investers;
+    }
+}
 ```
 
 ### 2. Compile และ Migrate
