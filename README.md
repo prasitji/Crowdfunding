@@ -60,10 +60,59 @@ truffle migrate
 ให้นำไฟล์ภาพที่ต้องการแสดงผลไปไว้ใน Directory image
 
 #### 3.2 แก้ไข pets.json
-ทำการ เปลี่ยนชื่อจาก pets.json ให้เป็น cars.json และ แก้ไขโค๊ดให้เป็นดังต่อไปนี้
+ทำการ เปลี่ยนชื่อจาก pets.json ให้เป็น companys.json และ แก้ไขโค๊ดให้เป็นดังต่อไปนี้
 ```
 [
-  code
+  {
+    "id": 0,
+    "name": "AD COMPANY",
+    "picture": "images/1AE.JPG",
+    "fund": 8000000,
+    "interest": "7.5 PERCENT",
+    "ratio": "5.5 TIMES"
+  },
+  {
+    "id": 1,
+    "name": "CS COMPANY",
+    "picture": "images/2CS.JPG",
+    "fund": 5000000,
+    "interest": "12.5 PERCENT",
+    "ratio": "3 TIMES"
+  },
+  {
+    "id": 2,
+    "name": "AEE COMPANY",
+    "picture": "images/3AEE.JPG",
+    "fund": 10000000,
+    "interest": "10.6 PERCENT",
+    "ratio": "5 TIMES"
+  },
+  {
+    "id": 3,
+    "name": "SCC COMPANY",
+    "picture": "images/4SCC.JPG",
+    "fund": 2000000,
+    "interest": "14.6 PERCENT",
+    "ratio": "5 TIMES"
+  },
+  {
+    "id": 4,
+    "name": "TM COMPANY",
+    "picture": "images/5TM.JPG",
+    "fund": 8000000,
+    "interest": "9.35 PERCENT",
+    "ratio": "2 TIMES"
+  },
+  {
+    "id": 5,
+    "name": "AF COMPANY",
+    "picture": "images/6AF.JPG",
+    "fund": 3000000,
+    "interest": "11.85 PERCENT",
+    "ratio": "5 TIMES"
+  }
+ 
+]
 ```
 #### 3.3 แก้ไข app.js
 ทำการแก้ไขตัวแปรต่างๆ สำหรับ Back-end
