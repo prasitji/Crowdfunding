@@ -44,7 +44,11 @@ truffle compile
 
 ใช้ Visual Studio Code ในการสร้างไฟล์ 2_deploy_contracts.js ในไดเร็กทอรี migrations ดังนี้
 ```
-code
+var crowdfunding = artifacts.require("crowdfunding");
+
+module.exports = function(deployer) {
+  deployer.deploy(crowdfunding);
+};
 ```
 เปิดโปรแกรม Ganache โดยการใช้เมาส์ดับเบิลคลิกที่ชื่อไฟล์ จากนั้น Click ที่ Workspace ที่ต้องการใช้งาน
 จากนั้นทำการ Migrate โดยใช้คำสั่ง 
